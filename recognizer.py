@@ -2,44 +2,43 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 import tensorflow as tf
+import time 
 
 camera = cv2.VideoCapture(0)
-blueLower = np.array([100, 36, 20], dtype = "uint8")
-blueUpper = np.array([231, 86, 90], dtype = "uint8")
-
-
+blueLower = np.array([80, 20, 20], dtype = "uint8")
+blueUpper = np.array([231, 110, 90], dtype = "uint8")
 
 
 def resize(image, width = None, height = None, inter = cv2.INTER_AREA):
-	# initialize the dimensions of the image to be resized and
-	# grab the image size
-	dim = None
-	(h, w) = image.shape[:2]
+    # initialize the dimensions of the image to be resized and
+    # grab the image size
+    dim = None
+    (h, w) = image.shape[:2]
 
-	# if both the width and height are None, then return the
-	# original image
-	if width is None and height is None:
-		return image
+    # if both the width and height are None, then return the
+    # original image
+    if width is None and height is None:
+        return image
 
-	# check to see if the width is None
-	if width is None:
-		# calculate the ratio of the height and construct the
-		# dimensions
-		r = height / float(h)
-		dim = (int(w * r), height)
+    # check to see if the width is None
+    if width is None:
+        # calculate the ratio of the height and construct the
+        # dimensions
+        r = height / float(h)
+        dim = (int(w * r), height)
 
-	# otherwise, the height is None
-	else:
-		# calculate the ratio of the width and construct the
-		# dimensions
-		r = width / float(w)
-		dim = (width, int(h * r))
+    # otherwise, the height is None
+    else:
+        # calculate the ratio of the width and construct the
+        # dimensions
+        r = width / float(w)
+        dim = (width, int(h * r))
 
-	# resize the image
-	resized = cv2.resize(image, dim, interpolation = inter)
+    # resize the image
+    resized = cv2.resize(image, dim, interpolation = inter)
 
-	# return the resized image
-	return resized
+    # return the resized image
+    return resized
 
 
 
@@ -157,7 +156,7 @@ with tf.Session() as sess:
         cv2.imshow('res', frame)
         cv2.imshow('blu', blue)
         
-        
+        time.sleep(0.05)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
         
