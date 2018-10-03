@@ -4,10 +4,9 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 import time 
 
-camera = cv2.VideoCapture(0)
-blueLower = np.array([80, 20, 20], dtype = "uint8")
-blueUpper = np.array([231, 110, 90], dtype = "uint8")
 
+blueLower = np.array([60, 10, 0], dtype = "uint8")
+blueUpper = np.array([255, 128, 50], dtype = "uint8")
 
 def resize(image, width = None, height = None, inter = cv2.INTER_AREA):
     # initialize the dimensions of the image to be resized and
@@ -121,7 +120,7 @@ Z3 = forward_propagation(X, parameters)
 
 
 
-
+camera = cv2.VideoCapture(0)
 with tf.Session() as sess:
     saver = tf.train.Saver()
     saver.restore(sess, tf.train.latest_checkpoint('checkpoints/'))
@@ -132,7 +131,11 @@ with tf.Session() as sess:
         frame = resize(frame, 400)
         blue = cv2.inRange(frame, blueLower, blueUpper)
         blue = cv2.GaussianBlur(blue, (3,3), 0)
-    
+# =============================================================================
+#         blue = cv2.erode(blue, None, 1)
+#         blue = cv2.dilate(blue, None, 1)
+# =============================================================================
+        
         _, cnts, _ = cv2.findContours(blue.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         
         pred = None
@@ -141,14 +144,26 @@ with tf.Session() as sess:
             x,y,w,h = cv2.boundingRect(cnt)
             cv2.rectangle(frame,(x,y),(x+w,y+h),(0,255,0),2)
             term = 0
+            
+            if x-10>0:
+                x= x-10
+            if y-10>0:
+                y = y-10
+            
             if h>w:
                 term = h
             else:
                 term = w
             
-            roi = blue[y:y+term,x:x+term]
+            roi = blue[y:y+term+20,x:x+term+20]
             roi = np.pad(roi, 3, 'minimum')
-            roi = cv2.resize(roi,(28,28))        
+            roi = cv2.resize(roi,(28,28))
+            
+            from sklearn.preprocessing import StandardScaler
+            scaler = StandardScaler()
+            roi = scaler.fit_transform(roi)
+            
+            
             roi = np.reshape(roi,(1,28,28,1))
             pred = sess.run(Z3, feed_dict={X : roi})
         
@@ -162,5 +177,4 @@ with tf.Session() as sess:
         
     camera.release()
     cv2.destroyAllWindows()
-    
-    
+
