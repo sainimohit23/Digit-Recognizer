@@ -120,6 +120,9 @@ Z3 = forward_propagation(X, parameters)
 
 
 
+
+
+boxes = int(input('Enter how many digits you want to recognize : '))
 camera = cv2.VideoCapture(0)
 with tf.Session() as sess:
     saver = tf.train.Saver()
@@ -140,34 +143,38 @@ with tf.Session() as sess:
         
         pred = None
         if len(cnts)> 0:
-            cnt = sorted(cnts, key=cv2.contourArea, reverse=True)[0]
-            x,y,w,h = cv2.boundingRect(cnt)
-            cv2.rectangle(frame,(x,y),(x+w,y+h),(0,255,0),2)
-            term = 0
-            
-            if x-10>0:
-                x= x-10
-            if y-10>0:
-                y = y-10
-            
-            if h>w:
-                term = h
-            else:
-                term = w
-            
-            roi = blue[y:y+term+20,x:x+term+20]
-            roi = np.pad(roi, 3, 'minimum')
-            roi = cv2.resize(roi,(28,28))
-            
-            from sklearn.preprocessing import StandardScaler
-            scaler = StandardScaler()
-            roi = scaler.fit_transform(roi)
-            
-            
-            roi = np.reshape(roi,(1,28,28,1))
-            pred = sess.run(Z3, feed_dict={X : roi})
-        
-        cv2.putText(frame,str(np.argmax(pred)), (200,200), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), lineType=cv2.LINE_AA)
+            cnt_1 = sorted(cnts, key=cv2.contourArea, reverse=True)[0:boxes]
+            for cnt in cnt_1:
+                x,y,w,h = cv2.boundingRect(cnt)
+                cv2.rectangle(frame,(x,y),(x+w,y+h),(0,255,0),2)
+                cv2.circle(frame,(x,y), 2, (0,0,255),-1)
+                term = 0
+                dispX = x
+                dispY = y
+                
+                if x-10>0:
+                    x= x-10
+                if y-10>0:
+                    y = y-10
+                
+                if h>w:
+                    term = h
+                else:
+                    term = w
+                
+                roi = blue[y:y+term+20,x:x+term+20]
+                roi = np.pad(roi, 3, 'minimum')
+                roi = cv2.resize(roi,(28,28))
+                
+                from sklearn.preprocessing import StandardScaler
+                scaler = StandardScaler()
+                roi = scaler.fit_transform(roi)
+                
+                
+                roi = np.reshape(roi,(1,28,28,1))
+                pred = sess.run(Z3, feed_dict={X : roi})
+                cv2.putText(frame,str(np.argmax(pred)), (dispX+ (w//2),dispY-2), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255), lineType=cv2.LINE_AA)
+       # cv2.putText(frame,"Predicted Value : "+str(np.argmax(pred)), (5,290), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), lineType=cv2.LINE_AA)
         cv2.imshow('res', frame)
         cv2.imshow('blu', blue)
         
