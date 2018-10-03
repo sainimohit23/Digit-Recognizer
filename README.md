@@ -4,7 +4,7 @@ This program lets you recognize digits using a neural network trained on MNIST d
 
 
 ### Code Requirements
-You can install Conda for python which resolves all the dependencies for machine learning.
+You can install Conda for python and tensorflow which will resolves all the dependencies for machine learning.
 
 ### Description
 Program is currently set to recognize digits written with blue color. `TF_MNIST_v4.0.py` file trains NN for 20 epochs and saves the trained weights in checkpoints directory.
